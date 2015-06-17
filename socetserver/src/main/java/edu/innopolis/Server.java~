@@ -95,7 +95,7 @@ public class Server {
     }
 
     public static void main(String[] args) {
-        Server server = new Server();
-        server.createSocket();
+        Server chatServer = new Server();
+        chatServer.createSocket();
     }
 }

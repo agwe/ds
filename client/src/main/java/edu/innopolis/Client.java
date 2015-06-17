@@ -88,9 +88,7 @@ public class Client {
     }
 
     public static void main(String[] args) throws Exception {
-        Client myChatClient = new Client();
-        myChatClient.createSocket();
-        /*myChatClient.createReadThread();
-        myChatClient.createWriteThread();*/
+        Client client = new Client();
+        client.createSocket();
     }
 }
