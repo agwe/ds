@@ -1,9 +1,14 @@
 package edu.innopolis;
 
+import org.apache.log4j.FileAppender;
+import org.apache.log4j.Logger;
+import org.apache.log4j.SimpleLayout;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
+import java.net.InetSocketAddress;
 import java.util.Calendar;
 import java.util.Objects;
 
@@ -11,66 +16,65 @@ import java.util.Objects;
  * Created by lara on 16/06/15.
  */
 public class Slave{
-    MulticastSocket multicastSocket;
-    InetAddress group;
-    int serverPort = 4445;
-    InetAddress serverAddress = InetAddress.getLocalHost();
-    //byte[] bufq = new byte[256];
-
+    static Logger logger = Logger.getLogger(Slave.class);
+    DatagramSocket slaveSocket;
+    int serverPort;
+    String[] slaveAdd;
+    InetAddress serverAddress;
     Calendar localTime;
-    String message;
-    //SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss.SSS");
 
-    public Slave(int socket, int millisec) throws IOException {
+    public Slave(String address, int millisec, String logFile) throws IOException {
         //initialize variables
-        multicastSocket = new MulticastSocket(1234);
-        group = InetAddress.getByName("230.0.0.1");
-        multicastSocket.joinGroup(group);
-
-        /*bufq = "client".getBytes();
-        DatagramPacket packet = new DatagramPacket(bufq, bufq.length, serverAddress, serverPort);
-        mu1lticastSocket.send(packet);*/
-
-        //initialize threads
-        readThread();
+        slaveSocket = new DatagramSocket(null);
+        slaveAdd = address.split(":");
+        InetSocketAddress slaveAddress = new InetSocketAddress(slaveAdd[0], Integer.parseInt(slaveAdd[1]));
+        slaveSocket.bind(slaveAddress);
 
         //initialize local time
         localTime = Calendar.getInstance();
         localTime.getTimeInMillis();
         localTime.add(Calendar.MILLISECOND, millisec);
+
+        SimpleLayout layout = new SimpleLayout();
+        FileAppender appender = new FileAppender(layout, logFile,false);
+        //logger.addAppender(appender);
+
+        //initialize threads
+        readThread();
+
+        logger.info("Client on " + slaveAddress.getAddress() + ":" + slaveAddress.getPort() + " is running");
     }
 
     public void readThread() {
         Thread readThread = new Thread() {
             public void run() {
-                System.out.println("[Client]: I'm ready");
                 while (true) {
                     try {
                         byte[] buf = new byte[256];
                         DatagramPacket packet = new DatagramPacket(buf, buf.length);
 
                         //receiving packet from server
-                        multicastSocket.receive(packet);
-                        System.out.println("[Client]: I got a packet");
+                        slaveSocket.receive(packet);
+                        logger.info("[Client]: I got a packet");
                         serverPort = packet.getPort();
                         serverAddress = packet.getAddress();
+                        String message;
                         message = new String(packet.getData(), 0, packet.getLength());
 
                         //sending localtime back to server
                         if (message.equals("time")) {
-                            System.out.println("[Client]: Server is requesting time");
+                            logger.info("[Client]: Server is requesting time");
                             String time = Objects.toString(localTime.getTimeInMillis(), null);
                             buf = time.getBytes();
 
                             packet = new DatagramPacket(buf, buf.length, serverAddress, serverPort);
-                            multicastSocket.send(packet);
-                            System.out.println("time: " + localTime.getTime() + " address: " + serverAddress + " port: " + serverPort);
+                            slaveSocket.send(packet);
+                            logger.info("time: " + localTime.getTime() + " address: " + serverAddress + " port: " + serverPort);
                         }
                         //changing current time
                         else {
                             writeThread(message);
                         }
-                        message = null;
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -91,10 +95,10 @@ public class Slave{
             public void run() {
                 while (running) {
                     try {
-                        System.out.println("Correcting clocks..");
-                        System.out.println("Client old time is ... " + localTime.getTime());
+                        logger.info("Correcting clocks..");
+                        logger.info("Client old time is ... " + localTime.getTime());
                         localTime.add(Calendar.MILLISECOND, Integer.parseInt(localMessage));//.valueOf(packet.getData())));
-                        System.out.println("Client current time is ... " + localTime.getTime());
+                        logger.info("Client current time is ... " + localTime.getTime());
                         running = false;
                     } catch (Exception e) {
                         e.printStackTrace();
