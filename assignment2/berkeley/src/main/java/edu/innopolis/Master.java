@@ -9,9 +9,12 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.*;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by lara on 16/06/15.
@@ -27,7 +30,11 @@ public class Master {
     ArrayList<String> sockets = new ArrayList<String>();
     ArrayList<Long> clientsTime = new ArrayList<Long>();
 
-    public Master(String add, int d, String slaves, String logFile) throws IOException {
+    DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
+    Date masterTime;
+    long masterTimeDiff;
+
+    public Master(String add, String time, int d, String slaves, String logFile) throws IOException, ParseException {
         //adding logger
         SimpleLayout layout = new SimpleLayout();
         FileAppender appender = new FileAppender(layout, logFile, false);
@@ -40,6 +47,10 @@ public class Master {
         datagramSocket.bind(socketAddress);
         logger.info("Server is running on  " + datagramSocket.getLocalSocketAddress());
         delta = d;
+        masterTime = dateFormat.parse(time);
+        String currentTime = dateFormat.format(new Date());
+        masterTimeDiff = Math.abs(getDateDiff(dateFormat.parse(currentTime), masterTime, TimeUnit.MILLISECONDS));
+        logger.info("[Server]: Current time: " + masterTime.toString() + " (real time: " + currentTime + ", difference: " + masterTimeDiff + " millisec).");
 
         //registering slaves;
         try {
@@ -68,14 +79,26 @@ public class Master {
             public void run() {
                 while (true) {
                     try {
-                        //Requesting time from clients
-                        logger.info("[Server] Requesting time from clients...");
                         byte[] buf;
-                        buf = time.getBytes();
                         DatagramPacket packet;
                         InetAddress address;
                         int port;
+                        //Forming packet for client (send request or send time)
+                        if (clientsTime.isEmpty()) {
+                            logger.info("[Server] Requesting time from clients...");
+                            buf = time.getBytes();
+                        } else {
+                            long diff = 0;
+                            for (long t: clientsTime) {
+                                diff += t;
+                            }
+                            long avg = diff/ clientsTime.size();
+                            buf = String.valueOf(avg).getBytes();
+                            logger.info("[Server] Sending time to clients...");
 
+                        }
+
+                        //Sending packet to client
                         for (String d : sockets) {
                             String[] ipPort = d.split(":");
                             address = InetAddress.getByName(ipPort[0]);
@@ -83,12 +106,8 @@ public class Master {
                             packet = new DatagramPacket(buf, buf.length, address, port);
                             datagramSocket.send(packet);
                         }
-                        masterRead();
 
-
-                        //Calculating time
-
-                        //Sending time back to clients
+                        masterRead(masterTimeDiff);
 
                         try {
                             Thread.sleep(10000);
@@ -98,7 +117,7 @@ public class Master {
                     } catch (UnknownHostException e) {
                         e.printStackTrace();
                     } catch (SocketTimeoutException e) {
-                        logger.info("[Server]: New round");
+
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
@@ -109,25 +128,33 @@ public class Master {
         masterWrite.start();
     }
 
-    public void masterRead() throws IOException {
+    public void masterRead(long masterTimeDiff) throws IOException {
         clientsTime.clear();
         byte[] buf = new byte[256];
         DatagramPacket packet = new DatagramPacket(buf, buf.length);
         int i = 0;
         while (i != clientsCount) {
             datagramSocket.receive(packet);
-            DateFormat formatter = new SimpleDateFormat("HH:mm:ss.SSS");
             long milliSeconds = Long.parseLong(new String(packet.getData(), 0, packet.getLength()));
             Calendar calendar = Calendar.getInstance();
             calendar.setTimeInMillis(milliSeconds);
 
-            logger.info("[Server] Client " + packet.getSocketAddress() + " time is " + formatter.format(calendar.getTime()));
+            logger.info("[Server] Client " + packet.getSocketAddress() + " time is " + dateFormat.format(calendar.getTime()));
 
-            clientsTime.add(milliSeconds);
+            //checking delta
+            if (Math.abs(masterTimeDiff - milliSeconds) < delta) {
+                clientsTime.add(milliSeconds);
+            }
             i++;
         }
     }
+
+    public static long getDateDiff(Date date1, Date date2, TimeUnit timeUnit) {
+        long diffInMillies = date2.getTime() - date1.getTime();
+        return timeUnit.convert(diffInMillies,TimeUnit.MILLISECONDS);
+    }
 }
+
 
     /*public void masterReadTimeout(long timeA) {
         byte[] buf = new byte[256];

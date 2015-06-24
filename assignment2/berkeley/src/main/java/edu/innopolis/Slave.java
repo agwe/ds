@@ -9,8 +9,11 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Calendar;
-import java.util.Objects;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by lara on 16/06/15.
@@ -21,9 +24,12 @@ public class Slave{
     int serverPort;
     String[] slaveAdd;
     InetAddress serverAddress;
-    Calendar localTime;
 
-    public Slave(String address, int millisec, String logFile) throws IOException {
+    DateFormat dateFormat = new SimpleDateFormat("HH:mm:ss.SSS");
+    Date slaveTime;
+    long slaveTimeDiff;
+
+    public Slave(String address, String time, String logFile) throws IOException, ParseException {
         //initialize variables
         slaveSocket = new DatagramSocket(null);
         slaveAdd = address.split(":");
@@ -31,9 +37,10 @@ public class Slave{
         slaveSocket.bind(slaveAddress);
 
         //initialize local time
-        localTime = Calendar.getInstance();
-        localTime.getTimeInMillis();
-        localTime.add(Calendar.MILLISECOND, millisec);
+        slaveTime = dateFormat.parse(time);
+        String currentTime = dateFormat.format(new Date());
+        slaveTimeDiff = Math.abs(Master.getDateDiff(dateFormat.parse(currentTime), slaveTime, TimeUnit.MILLISECONDS));
+        logger.info("[Server]: Current time: " + slaveTime.toString() + " (real time: " + currentTime + ", difference: " + slaveTimeDiff + " millisec).");
 
         SimpleLayout layout = new SimpleLayout();
         FileAppender appender = new FileAppender(layout, logFile,false);
@@ -64,16 +71,16 @@ public class Slave{
                         //sending localtime back to server
                         if (message.equals("time")) {
                             logger.info("[Client]: Server is requesting time");
-                            String time = Objects.toString(localTime.getTimeInMillis(), null);
-                            buf = time.getBytes();
+                            String currentTime = dateFormat.format(new Date());
+                            buf = String.valueOf(dateFormat.parse(currentTime).getTime() + slaveTimeDiff).getBytes();
 
                             packet = new DatagramPacket(buf, buf.length, serverAddress, serverPort);
                             slaveSocket.send(packet);
-                            logger.info("time: " + localTime.getTime() + " address: " + serverAddress + " port: " + serverPort);
+                            logger.info("[Client]: Current time: " + currentTime + " address: " + serverAddress + " port: " + serverPort);
                         }
                         //changing current time
                         else {
-                            writeThread(message);
+                            writeTime(packet);
                         }
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -84,7 +91,25 @@ public class Slave{
         readThread.start();
     }
 
-    public void writeThread(final String localMessage) {
+    public void writeTime(final DatagramPacket packet) {
+        try {
+            logger.info("[Client]: Correcting clocks..");
+            logger.info("[Client]: Old time is ... " + dateFormat.format(new Date()));
+
+            long milliSeconds = Long.parseLong(new String(packet.getData(), 0, packet.getLength()));
+            slaveTimeDiff+=milliSeconds;
+            long current = dateFormat.parse(dateFormat.format(new Date())).getTime()+slaveTimeDiff;
+            logger.info("[Client]: Current time is ... " + new Date(current * 1000));
+            // running = false;
+            } catch (Exception e) {
+                e.printStackTrace();
+        }
+    }
+
+}
+
+/*
+public void writeTime(final String localMessage) {
         Thread writeThread = new Thread() {
             private volatile boolean running = true;
 
@@ -95,10 +120,11 @@ public class Slave{
             public void run() {
                 while (running) {
                     try {
-                        logger.info("Correcting clocks..");
-                        logger.info("Client old time is ... " + localTime.getTime());
+                        logger.info("[Client]: Correcting clocks..");
+                        logger.info("[Client]: Old time is ... " + dateFormat.format(new Date()));
+
                         localTime.add(Calendar.MILLISECOND, Integer.parseInt(localMessage));//.valueOf(packet.getData())));
-                        logger.info("Client current time is ... " + localTime.getTime());
+                        logger.info("[Client]: Current time is ... " + localTime.getTime());
                         running = false;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -108,4 +134,4 @@ public class Slave{
         };
         writeThread.start();
     }
-}
+ */
