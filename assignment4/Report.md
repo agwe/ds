@@ -1,0 +1,39 @@
+# DFS design
+
+**Assumption 1:** dfs works only with text files. Because even in real system you need external application to open any files except text files.
+
+**Assumption 2:** files are stored in memory, not on the hard disk.
+
+### There are 3 types of paticipants in the system:
+1. Client - get user commands from the cmd and parse them (validate, interpret to decide which method from master to run).
+2. Master - route requests to the servers, choose server via roundrobin, store filesystem tree
+3. Server(s) - store files
+
+##Client
+
+Client is created from cmd with list of server adresses in txt file and local address (both adresses are in format "ip:port")
+Then client is ready to exeute user commands.
+
+### Possible user commands
+
+**cat** - open file, if it exists in current directory; create file otherwise
+**rm** - delete file, if it exists in current directory
+**mkdir** - create folder, if it doesn't exist in current directory
+**rmdir** - delete folder, if it exists in current directory
+**cd** - change directory, if it exists in current directory or a parent of current directory
+**ls** - list files and folders in directory
+**stat** - get file or directory info
+
+##Master
+Master is a part of cient. It owns methods to work with server and file structure.
+
+**Master constructor.** Creates client's socket, parse the file with server addresses and created socke for them.
+
+**ChooseServer** Has routing functions for choosing server (choosing the one in order (current server position is stored by means of iterator for sockets array), getting next from the server sockets list, if the prevous one was unavailable and count if all were tried in one round, whish means that all servers are unavailable)
+
+**StoreData** Send data to chose in choose server method server.
+
+**GetData** Retrieve data with specified hash from the server, which address is stored in object pathToServer field.
+
+
+
