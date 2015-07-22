@@ -19,11 +19,17 @@ Then client is ready to exeute user commands.
 ### Possible user commands
 
 **cat** - open file, if it exists in current directory; create file otherwise
+
 **rm** - delete file, if it exists in current directory
+
 **mkdir** - create folder, if it doesn't exist in current directory
+
 **rmdir** - delete folder, if it exists in current directory
+
 **cd** - change directory, if it exists in current directory or a parent of current directory
+
 **ls** - list files and folders in directory
+
 **stat** - get file or directory info
 
 ##Master
@@ -42,8 +48,11 @@ Other methods like changeDirectory, openFile etc. contains logic to process corr
 ###Filesystem structure
 
 Structure is stored in the tree. Src contains 3 classes TreeNode (abstract), DirectoryNode for disrectories and FieNode for storing files correspondingly. 
+
 **TreeNode** contains basic properties as name, hash (to uniquily identify files) and parent node.
+
 **FileNode** moreover contains path to the server, where file is stored
+
 **DirectoryNode** moreover contains directory children
 
 ##Server##
