@@ -35,5 +35,25 @@ Master is a part of cient. It owns methods to work with server and file structur
 
 **GetData** Retrieve data with specified hash from the server, which address is stored in object pathToServer field.
 
+Other methods like changeDirectory, openFile etc. contains logic to process corresponding user commands.
+
+###Filesystem structure
+
+Structure is stored in the tree. Src contains 3 classes TreeNode (abstract), DirectoryNode for disrectories and FieNode for storing files correspondingly. 
+**TreeNode** contains basic properties as name, hash (to uniquily identify files) and parent node.
+**FileNode** moreover contains path to the server, where file is stored
+**DirectoryNode** moreover contains directory children
+
+##Server##
+Server has to be run separately with parameter "ip:port" in order to create server socket. Server parse input parameter and in case of success start server thread wich process requests from master: 
+1. Store file
+2. Delete file
+3. Return file
+
+All files are stored without any hierarchy with their hash as names instead of their real names (in order to avoid duplication). 
+
+
+
+
 
 
