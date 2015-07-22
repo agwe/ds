@@ -25,7 +25,7 @@ public class Server {
                 inStream = socket.getInputStream();
                 outStream = socket.getOutputStream();
                 outputStreams.add(outStream);
-                System.out.println("Connected");
+                System.out.println("[Server]: New client is connected");
                 createReadThread();
                 createWriteThread();
 

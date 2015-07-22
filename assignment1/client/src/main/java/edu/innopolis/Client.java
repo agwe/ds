@@ -17,7 +17,7 @@ public class Client {
     public void createSocket() {
         try {
             socket = new Socket("localHost", 3339);
-            System.out.println("Connected");
+            System.out.println("[Client]: Connected");
             inStream = socket.getInputStream();
             outStream = socket.getOutputStream();
             createReadThread();

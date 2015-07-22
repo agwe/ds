@@ -116,7 +116,7 @@ public class Master {
                         }
                     } catch (UnknownHostException e) {
                         e.printStackTrace();
-                    } catch (SocketTimeoutException e) {
+                    } catch (SocketTimeoutException e) { logger.info("New timeout round");
 
                     } catch (IOException e) {
                         e.printStackTrace();
