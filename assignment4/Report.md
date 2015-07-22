@@ -4,6 +4,8 @@
 
 **Assumption 2:** files are stored in memory, not on the hard disk.
 
+**Assumption3**: There is predefined list of servers in server list passing as a parameter to the client, so no new servers can join the system in runtime.
+
 ### There are 3 types of paticipants in the system:
 1. Client - get user commands from the cmd and parse them (validate, interpret to decide which method from master to run).
 2. Master - route requests to the servers, choose server via roundrobin, store filesystem tree
@@ -52,6 +54,8 @@ Server has to be run separately with parameter "ip:port" in order to create serv
 
 All files are stored without any hierarchy with their hash as names instead of their real names (in order to avoid duplication). 
 
+##DSS Taxonomy##
+Solution represents global centrilized architecture in trusted environment
 
 
 
