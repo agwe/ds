@@ -1,33 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="6e53d4df-1757-4914-ac5d-5f68728ee895" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment2/berkeley/target/classes/edu/innopolis/App.class" afterPath="$PROJECT_DIR$/../../assignment2/berkeley/target/classes/edu/innopolis/App.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/client/target/test-classes/edu/innopolis/AppTest.class" afterPath="$PROJECT_DIR$/../../assignment1/client/target/test-classes/edu/innopolis/AppTest.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/socetserver/target/test-classes/edu/innopolis/AppTest.class" afterPath="$PROJECT_DIR$/../../assignment1/socetserver/target/test-classes/edu/innopolis/AppTest.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/client/target/classes/edu/innopolis/Client$1.class" afterPath="$PROJECT_DIR$/../../assignment1/client/target/classes/edu/innopolis/Client$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/client/target/classes/edu/innopolis/Client$2.class" afterPath="$PROJECT_DIR$/../../assignment1/client/target/classes/edu/innopolis/Client$2.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/client/target/classes/edu/innopolis/Client.class" afterPath="$PROJECT_DIR$/../../assignment1/client/target/classes/edu/innopolis/Client.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment2/berkeley/target/classes/edu/innopolis/Master$1.class" afterPath="$PROJECT_DIR$/../../assignment2/berkeley/target/classes/edu/innopolis/Master$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/socetserver/target/classes/edu/innopolis/Server$1.class" afterPath="$PROJECT_DIR$/../../assignment1/socetserver/target/classes/edu/innopolis/Server$1.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/socetserver/target/classes/edu/innopolis/Server$2.class" afterPath="$PROJECT_DIR$/../../assignment1/socetserver/target/classes/edu/innopolis/Server$2.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/socetserver/target/classes/edu/innopolis/Server.class" afterPath="$PROJECT_DIR$/../../assignment1/socetserver/target/classes/edu/innopolis/Server.class" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment2/berkeley/target/berkeley-1.0.jar" afterPath="$PROJECT_DIR$/../../assignment2/berkeley/target/berkeley-1.0.jar" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/client/target/client-1.0-SNAPSHOT.jar" afterPath="$PROJECT_DIR$/../../assignment1/client/target/client-1.0-SNAPSHOT.jar" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment2/berkeley/masterlog" afterPath="$PROJECT_DIR$/../../assignment2/berkeley/masterlog" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/socetserver/target/socetserver-1.0-SNAPSHOT.jar" afterPath="$PROJECT_DIR$/../../assignment1/socetserver/target/socetserver-1.0-SNAPSHOT.jar" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/client/src/main/java/edu/innopolis/Client.java" afterPath="$PROJECT_DIR$/../../assignment1/client/src/main/java/edu/innopolis/Client.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment2/berkeley/src/main/java/edu/innopolis/Master.java" afterPath="$PROJECT_DIR$/../../assignment2/berkeley/src/main/java/edu/innopolis/Master.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/socetserver/src/main/java/edu/innopolis/Server.java" afterPath="$PROJECT_DIR$/../../assignment1/socetserver/src/main/java/edu/innopolis/Server.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/client/target/surefire-reports/TEST-edu.innopolis.AppTest.xml" afterPath="$PROJECT_DIR$/../../assignment1/client/target/surefire-reports/TEST-edu.innopolis.AppTest.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/socetserver/target/surefire-reports/TEST-edu.innopolis.AppTest.xml" afterPath="$PROJECT_DIR$/../../assignment1/socetserver/target/surefire-reports/TEST-edu.innopolis.AppTest.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment2/berkeley/target/surefire-reports/TEST-edu.innopolis.AppTest.xml" afterPath="$PROJECT_DIR$/../../assignment2/berkeley/target/surefire-reports/TEST-edu.innopolis.AppTest.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/client/target/surefire-reports/edu.innopolis.AppTest.txt" afterPath="$PROJECT_DIR$/../../assignment1/client/target/surefire-reports/edu.innopolis.AppTest.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/socetserver/target/surefire-reports/edu.innopolis.AppTest.txt" afterPath="$PROJECT_DIR$/../../assignment1/socetserver/target/surefire-reports/edu.innopolis.AppTest.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment2/berkeley/target/surefire-reports/edu.innopolis.AppTest.txt" afterPath="$PROJECT_DIR$/../../assignment2/berkeley/target/surefire-reports/edu.innopolis.AppTest.txt" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment1/socetserver/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../../assignment1/socetserver/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../assignment2/berkeley/.idea/workspace.xml" afterPath="$PROJECT_DIR$/../../assignment2/berkeley/.idea/workspace.xml" />
-    </list>
+    <list default="true" id="6e53d4df-1757-4914-ac5d-5f68728ee895" name="Default" comment="" />
     <ignored path="dfs.iws" />
     <ignored path=".idea/workspace.xml" />
     <ignored path="$PROJECT_DIR$/target/" />
