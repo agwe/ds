@@ -249,7 +249,7 @@ public class Master {
         return dirChildren;
     }
 
-    public Boolean ifChildFileExist(String name) {
+    public Boolean ifChildFileExiscdt(String name) {
         return !currentDirectory.getChildFileByName(name).isEmpty();
     }
 
