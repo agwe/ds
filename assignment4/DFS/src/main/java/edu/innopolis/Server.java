@@ -14,17 +14,12 @@ public class Server {
 
 
     public static void main( String[] args ) throws SocketException, UnknownHostException {
-        String res;
-        Boolean running = true;
+        Boolean running = false;
         running = parseUserArguments(args);
         if (running) {
             ServerThread server = new ServerThread(args[0]);
+            server.createServerThread();
             logger.info("[Server]: Connection on " + args[0] + " is established");
-        }
-
-        while (running){
-
-
         }
     }
 
@@ -51,18 +46,3 @@ public class Server {
         }
     }
 }
-
-
-
-
-            /*BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            try {
-                res = reader.readLine();
-                if (res.equals("exit")){
-                    running = false;
-                    logger.info("[Client]: Bye!");
-                } else
-                    parseUserInput(res);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }*/

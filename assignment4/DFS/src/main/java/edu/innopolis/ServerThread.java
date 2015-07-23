@@ -50,13 +50,18 @@ public class ServerThread {
 
                         if (contains(command)) {
                             String hash = request[1];
-                            String value;
+                            String value = "";
                             Commands c = Commands.valueOf(command);
                             switch (c) {
                                 case put:
                                     value = request[2];
                                     if (value!=null) {
-                                        storedData.put(hash, value);
+                                        if (storedData.containsKey(hash)){
+                                            storedData.remove(hash);
+                                            storedData.put(hash, value);
+                                        } else {
+                                            storedData.put(hash, value);
+                                        }
                                         buf = "ok".getBytes();
                                     } else {
                                         buf = "null".getBytes();

@@ -25,5 +25,8 @@
         <module name="berkeley" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="berkeley" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
 </project>

@@ -55,11 +55,32 @@ public class DirectoryNode extends TreeNode{
         if (children!=null) {
             for (TreeNode node : children) {
                 if (node.getName().equals(name) && node instanceof FileNode) {
-                    return new ArrayList<TreeNode>((Collection<? extends TreeNode>) node);
+                    ArrayList<TreeNode> nodes = new ArrayList<TreeNode>();
+                    nodes.add(node);
+                    return nodes;
                 }
             }
         }
         return new ArrayList<TreeNode>();
+    }
+
+    /**
+     * recursively get all child files from the specified directory
+     * @return ArrayList of all child files
+     */
+    public ArrayList<FileNode> getAllChildFilesRecursively(){
+        ArrayList<FileNode> allFiles = new ArrayList<>();
+        for (TreeNode node : this.getChildren()){
+            if (node instanceof FileNode) {
+                allFiles.add((FileNode) node);
+            }
+            else {
+                if (node instanceof DirectoryNode) {
+                    ((DirectoryNode) node).getAllChildFilesRecursively();
+                }
+            }
+        }
+        return allFiles;
     }
 
     public void setChildren(TreeNode child) {

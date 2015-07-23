@@ -1,6 +1,7 @@
 package edu.innopolis;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.*;
@@ -54,8 +55,9 @@ public class Master {
         InetSocketAddress socketAddress = new InetSocketAddress(clientAddress[0], Integer.parseInt(clientAddress[1]));
         datagramSocket.bind(socketAddress);
 
-        //set servers counter to zero
-        counter = 0;
+        //set servers counters to zero
+        operationCounter = 0;
+        currentServerCounter = 0;
     }
 
     /**
@@ -77,9 +79,15 @@ public class Master {
     }
 
 
-    public void storeData(String command, String hash, String value) throws SocketException {
+    public String requestServer(String command, String hash, String pathToServer, String value) throws SocketException {
         datagramSocket.setSoTimeout(10000);
-        String serverAddress = chooseServer();
+        String serverAddress = "";
+        if (pathToServer == null){
+            serverAddress = chooseServer();
+        } else {
+            serverAddress = pathToServer;
+        }
+
         try {
             //check if any server has responded
             if (!serverAddress.isEmpty()) {
@@ -90,18 +98,21 @@ public class Master {
                 Integer port = Integer.valueOf(sd[1]);
 
                 byte[] buf;
-                buf = (command+":+:"+hash+":+:" +value).getBytes();
+                buf = (command + ":+:" + hash +":+:" + value).getBytes();
                 DatagramPacket packet;
                 packet = new DatagramPacket(buf, buf.length, ipAddressName, port);
                 datagramSocket.send(packet);
                 datagramSocket.receive(packet);
                 String message;
                 message = new String(packet.getData(), 0, packet.getLength());
+                return message;
 
             } else {
-                counter++;
-                if (counter<sockets.size()){
-                    storeData(command, hash, value);
+                operationCounter++;
+                if (operationCounter<sockets.size()){
+                    if (pathToServer == null) {
+                        requestServer(command, hash, pathToServer, value);
+                    } else return String.valueOf(response.NO_RESPONSE);
                 }
                 else throw new NoServerException();
             }
@@ -111,18 +122,20 @@ public class Master {
             e.printStackTrace();
         } catch (SocketTimeoutException e){
             logger.severe("[Client]: Can't save a file. No respond from filesystem");
-
+            return String.valueOf(response.TIMEOUT);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return "";
     }
 
+
     //todo retrieving file/folder data
-    public String getData(TreeNode node){
+    /**public String getData(TreeNode node){
         //String pathToServer = node.getPathToServer();
         //if (!pathToServer.isEmpty())
         return "";
-    }
+    }**/
 
     /**
      * create file in current directory
@@ -137,18 +150,51 @@ public class Master {
         }
         else {
             FileNode node = new FileNode(name);
-            storeData("put", node.getHash(), node.getName());
-            currentDirectory.setChildren(node);
+            String resp = requestServer("put", node.getHash(), null, node.getName());
+            if (resp.equals("ok")){
+                currentDirectory.setChildren(node);
+                return String.valueOf(response.OK);
+            }
         }
-        return String.valueOf(response.OK);
+        return String.valueOf(response.FAIL);
     }
 
-    public String openFile(String name){
+    /**
+     * create new directory in the working one
+     * @param name - name of new directory
+     */
+    public String createDirectory(String name) {
+        if (currentDirectory.getChildDirectoryByName(name)!= null){
+            return String.valueOf(response.DIRECTORY_EXIST);
+        } else {
+            DirectoryNode node = new DirectoryNode(name);
+            currentDirectory.setChildren(node);
+            node.setParent(currentDirectory);
+            return String.valueOf(response.OK);
+        }
+    }
+
+    public String rewriteFile(String name, String value) throws SocketException {
+        FileNode node = (FileNode) currentDirectory.getChildFileByName(name).get(0);
+        String resp = requestServer("put", node.getHash(), node.getPathToServer(), value);
+        currentDirectory.setChildren(node);
+        if (resp.equals("ok")){
+            currentDirectory.setChildren(node);
+            return String.valueOf(response.OK);
+        }
+        return String.valueOf(response.FAIL);
+    }
+
+    public String openFile(String name) throws SocketException {
         ArrayList<TreeNode> nodes = currentDirectory.getChildFileByName(name);
         if (nodes!=null && !nodes.isEmpty()){
-            return getData(nodes.get(0));
+            FileNode node = (FileNode) nodes.get(0);
+            String resp = requestServer("get", node.getHash(), node.getPathToServer(), "");
+            if (!resp.equals("ok") && !resp.equals("null")){
+                return resp;
+            }
         }
-        else return String.valueOf(response.NO_FILE);
+        return String.valueOf(response.FAIL);
     }
 
     /**
@@ -156,8 +202,14 @@ public class Master {
      * @param name - String, directory name
      * @return "OK", if deleted, FAIL - otherwise
      */
-    public String deleteDirectory(String name) {
-        if (currentDirectory.ifChilDirectoryExist(name)){
+    public String deleteDirectory(String name) throws SocketException {
+        ArrayList<TreeNode> nodes = currentDirectory.getChildDirectoryByName(name);
+        if (!nodes.isEmpty()){
+            DirectoryNode node = (DirectoryNode) nodes.get(0);
+            ArrayList<FileNode> childFiles = node.getAllChildFilesRecursively();
+            for (FileNode nd : childFiles){
+                deleteFile(node.getName());
+            }
             currentDirectory.removeChild(name);
             return String.valueOf(response.OK);
         }
@@ -169,24 +221,18 @@ public class Master {
      * @param name - String, directory name
      * @return "OK", if deleted, FAIL - otherwise
      */
-    public String deleteFile(String name) {
-        if (currentDirectory.ifChildFileExist(name)){
-            currentDirectory.removeChild(name);
-            return String.valueOf(response.OK);
+    public String deleteFile(String name) throws SocketException {
+        ArrayList<TreeNode> nodes = currentDirectory.getChildFileByName(name);
+        if (nodes.isEmpty()){
+            FileNode node = (FileNode) nodes.get(0);
+            String resp = requestServer("rm", node.getHash(), node.getPathToServer(), "");
+            if (resp.equals("ok")){
+                currentDirectory.removeChild(name);
+                return String.valueOf(response.OK);
+            }
+            else return String.valueOf(response.FAIL);
         }
-        else return String.valueOf(response.NO_FILE);
-    }
-
-
-    /**
-     * create new directory in the working one
-     * @param name - name of new directory
-     */
-    public String createDirectory(String name) {
-        DirectoryNode node = new DirectoryNode(name);
-        currentDirectory.setChildren(node);
-        node.setParent(currentDirectory);
-        return String.valueOf(response.OK);
+        return String.valueOf(response.NO_FILE);
     }
 
     /**

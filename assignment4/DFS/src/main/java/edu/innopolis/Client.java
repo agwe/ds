@@ -69,31 +69,23 @@ public class Client
                 Commands c = Commands.valueOf(cmd[0]);
                 switch (c) {
                     case cat:
-                        if (master.ifChildFileExist(arg)) {
-                            if (cmd.length == 3) {
-                                master.createFile(arg, cmd[2]);
+                        Boolean exist = master.ifChildFileExist(arg);
+                        Boolean threeArgs = cmd.length == 3;
 
-                            } else
-                                response = master.openFile(arg);
-                        } else {
-                            if (cmd.length == 3) {
-                                //response = master.createFile(arg, cmd[2]);
+                        if (exist && threeArgs){
+                            master.rewriteFile(arg, cmd[2]);
+                        } else if (exist && !threeArgs){
+                            response = master.openFile(arg);
+                            logger.info("[Client]: File " + arg + " was rewritten");
+                            if (!response.equals("NO_FILE")){
+                                logger.info("[Client]: Opening " + arg + "...");
+                                logger.info(response);
                             }
-                        } else {
-
-                        }
-
-
-                        if (response.equals("NO_FILE")) {
+                        } else if (!exist && threeArgs){
+                            master.createFile(arg, cmd[2]);
+                            logger.info("[Client]: File " + arg + " was saved");
+                        } else if (!exist && !threeArgs){
                             logger.info("[Client]: No file with the name specified was found");
-                            if (cmd.length == 3) {
-                                response = master.createFile(arg, cmd[2]);
-                            } else {
-                                logger.info("[Client]: Please specify the correct value argument if you want to create a new file. ");
-                            }
-                        } else {
-                            logger.info("[Client]: Opening " + arg + "...");
-                            logger.info(response);
                         }
                         break;
                     case rm:
