@@ -7,7 +7,6 @@ import java.util.List;
  */
 public abstract class TreeNode {
         private String name;
-        private String pathToServer;
         private String hash;
         private DirectoryNode parent;
 
@@ -17,14 +16,6 @@ public abstract class TreeNode {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getPathToServer() {
-        return pathToServer;
-    }
-
-    public void setPathToServer(String pathToServer) {
-        this.pathToServer = pathToServer;
     }
 
     public String getHash() {

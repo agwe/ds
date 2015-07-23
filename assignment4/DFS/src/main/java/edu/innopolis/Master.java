@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -17,12 +14,13 @@ public class Master {
     //log4j logger
     static Logger logger = Logger.getLogger(String.valueOf(Client.class));
     ArrayList<String> sockets = new ArrayList<String>();
-    Iterator<String> it;
+    //Iterator it = sockets.iterator();
     DatagramSocket datagramSocket;
     //file system structure
     DirectoryNode root;
     DirectoryNode currentDirectory;
-    int counter;
+    int operationCounter;
+    int currentServerCounter;
 
     public void registerServers(String servers){
         try {
@@ -67,11 +65,14 @@ public class Master {
     private String chooseServer(){
         String path;
         try {
-            path = it.next();
+            if (currentServerCounter == sockets.size()){
+                currentServerCounter = 0;
+            }
+            path = sockets.get(currentServerCounter);
             return path;
         } catch (NoSuchElementException e){
-            it =  sockets.iterator();
-            return it.next();
+            //it =  sockets.iterator();
+            return "";
         }
     }
 
@@ -82,7 +83,7 @@ public class Master {
         try {
             //check if any server has responded
             if (!serverAddress.isEmpty()) {
-                counter = 0;
+                operationCounter = 0;
                 //initiaize connection with chosen server
                 String[] sd = serverAddress.split(":");
                 InetAddress ipAddressName = InetAddress.getByName(sd[0]);
@@ -118,8 +119,8 @@ public class Master {
 
     //todo retrieving file/folder data
     public String getData(TreeNode node){
-        String pathToServer = node.getPathToServer();
-        if (!pathToServer.isEmpty())
+        //String pathToServer = node.getPathToServer();
+        //if (!pathToServer.isEmpty())
         return "";
     }
 
@@ -130,22 +131,22 @@ public class Master {
      * @return String answer OK or FILE_EXIST
      * @throws SocketException
      */
-    public response createFile(String name, String value) throws SocketException {
+    public String createFile(String name, String value) throws SocketException {
         if (currentDirectory.ifChildFileExist(name)){
-            return response.FILE_EXIST;
+            return String.valueOf(response.FILE_EXIST);
         }
         else {
             FileNode node = new FileNode(name);
             storeData("put", node.getHash(), node.getName());
             currentDirectory.setChildren(node);
         }
-        return response.OK;
+        return String.valueOf(response.OK);
     }
 
     public String openFile(String name){
-        ArrayList<TreeNode> node = currentDirectory.getChildFileByName(name);
-        if (node!=null){
-            return getData(node.get(0));
+        ArrayList<TreeNode> nodes = currentDirectory.getChildFileByName(name);
+        if (nodes!=null && !nodes.isEmpty()){
+            return getData(nodes.get(0));
         }
         else return String.valueOf(response.NO_FILE);
     }
@@ -181,7 +182,7 @@ public class Master {
      * create new directory in the working one
      * @param name - name of new directory
      */
-    public String createFolder(String name) {
+    public String createDirectory(String name) {
         DirectoryNode node = new DirectoryNode(name);
         currentDirectory.setChildren(node);
         node.setParent(currentDirectory);
@@ -203,14 +204,32 @@ public class Master {
         } return String.valueOf(response.NO_DIRECTORY);
     }
 
+    public String changeDirectoryToParent() {
+        if (currentDirectory != root) {
+            DirectoryNode parentDirectory = currentDirectory.getParent();
+            if (parentDirectory !=null){
+                currentDirectory = parentDirectory;
+                return String.valueOf(currentDirectory.getName());
+            }
+        } return String.valueOf(response.NO_DIRECTORY);
+    }
+
+    /**
+     * return current working folder from tree structure
+     * @return DirectoryNode
+     */
+    public void changeDirectoryToRoot(){
+        currentDirectory = root;
+    }
+
     /**
      * List all children of desired directory
-     * @param directoryName - String
+     * @param
      * @return List of children
      */
-    public List<String> listDirectoryFiles(String directoryName) {
+    public List<String> listDirectoryFiles() {
         List<TreeNode> children = currentDirectory.getChildren();
-        List dirChildren = null;
+        ArrayList dirChildren = new ArrayList();
         for (TreeNode node: children){
             if (node instanceof FileNode){
                 dirChildren.add(node.getName());
@@ -219,15 +238,19 @@ public class Master {
         return dirChildren;
     }
 
-    public List<String> listDirectoryDirectories(String directoryName) {
+    public List<String> listDirectoryDirectories() {
         List<TreeNode> children = currentDirectory.getChildren();
-        List dirChildren = null;
+        ArrayList dirChildren = new ArrayList();
         for (TreeNode node: children){
             if (node instanceof DirectoryNode){
                 dirChildren.add(node.getName());
             }
         }
         return dirChildren;
+    }
+
+    public Boolean ifChildFileExist(String name) {
+        return !currentDirectory.getChildFileByName(name).isEmpty();
     }
 
     /**
@@ -247,14 +270,6 @@ public class Master {
                 }
             }
         return nodeParameters;
-    }
-
-    /**
-     * return current working folder from tree structure
-     * @return DirectoryNode
-     */
-    public DirectoryNode getCurrentDirectory(){
-        return currentDirectory;
     }
 
     public enum response {
