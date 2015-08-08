@@ -18,7 +18,8 @@ public class Server {
         running = parseUserArguments(args);
         if (running) {
             ServerThread server = new ServerThread(args[0]);
-            server.createServerThread();
+            server.runServer();
+
             logger.info("[Server]: Connection on " + args[0] + " is established");
         }
     }
@@ -45,4 +46,5 @@ public class Server {
             return false;
         }
     }
+
 }

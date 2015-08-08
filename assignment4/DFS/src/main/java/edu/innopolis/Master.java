@@ -1,11 +1,12 @@
 package edu.innopolis;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.logging.Logger;
 
 /**
@@ -17,11 +18,13 @@ public class Master {
     ArrayList<String> sockets = new ArrayList<String>();
     //Iterator it = sockets.iterator();
     DatagramSocket datagramSocket;
-    //file system structure
+    //file system
+    // structure
     DirectoryNode root;
     DirectoryNode currentDirectory;
     int operationCounter;
     int currentServerCounter;
+    String serverAddress;
 
     public void registerServers(String servers){
         try {
@@ -81,7 +84,7 @@ public class Master {
 
     public String requestServer(String command, String hash, String pathToServer, String value) throws SocketException {
         datagramSocket.setSoTimeout(10000);
-        String serverAddress = "";
+        serverAddress = "";
         if (pathToServer == null){
             serverAddress = chooseServer();
         } else {
@@ -98,7 +101,7 @@ public class Master {
                 Integer port = Integer.valueOf(sd[1]);
 
                 byte[] buf;
-                buf = (command + ":+:" + hash +":+:" + value).getBytes();
+                buf = (command + "-" + hash +"-" + value).getBytes();
                 DatagramPacket packet;
                 packet = new DatagramPacket(buf, buf.length, ipAddressName, port);
                 datagramSocket.send(packet);
@@ -149,10 +152,12 @@ public class Master {
             return String.valueOf(response.FILE_EXIST);
         }
         else {
-            FileNode node = new FileNode(name);
-            String resp = requestServer("put", node.getHash(), null, node.getName());
+            FileNode node = new FileNode(name, currentDirectory);
+            String resp = requestServer("put", node.getHash(), null, value);
             if (resp.equals("ok")){
                 currentDirectory.setChildren(node);
+                node.setParent(currentDirectory);
+                node.setPathToServer(serverAddress);
                 return String.valueOf(response.OK);
             }
         }
@@ -164,7 +169,7 @@ public class Master {
      * @param name - name of new directory
      */
     public String createDirectory(String name) {
-        if (currentDirectory.getChildDirectoryByName(name)!= null){
+        if (!currentDirectory.getChildDirectoryByName(name).isEmpty()){
             return String.valueOf(response.DIRECTORY_EXIST);
         } else {
             DirectoryNode node = new DirectoryNode(name);
@@ -223,7 +228,7 @@ public class Master {
      */
     public String deleteFile(String name) throws SocketException {
         ArrayList<TreeNode> nodes = currentDirectory.getChildFileByName(name);
-        if (nodes.isEmpty()){
+        if (!nodes.isEmpty()){
             FileNode node = (FileNode) nodes.get(0);
             String resp = requestServer("rm", node.getHash(), node.getPathToServer(), "");
             if (resp.equals("ok")){

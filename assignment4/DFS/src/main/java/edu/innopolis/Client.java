@@ -74,9 +74,9 @@ public class Client
 
                         if (exist && threeArgs){
                             master.rewriteFile(arg, cmd[2]);
+                            logger.info("[Client]: File " + arg + " was rewritten");
                         } else if (exist && !threeArgs){
                             response = master.openFile(arg);
-                            logger.info("[Client]: File " + arg + " was rewritten");
                             if (!response.equals("NO_FILE")){
                                 logger.info("[Client]: Opening " + arg + "...");
                                 logger.info(response);
@@ -108,6 +108,9 @@ public class Client
                         response = master.createDirectory(arg);
                         if (response.equals("OK")) {
                             logger.info("[Client]: Directory " + arg + " was created");
+                        } else if (response.equals("DIRECTORY_EXIST"))
+                        {
+                            logger.info("[Client]: Directory " + arg + " already exists");
                         }
                         break;
                     case cd:

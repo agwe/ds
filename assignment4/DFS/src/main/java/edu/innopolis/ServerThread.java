@@ -28,81 +28,78 @@ public class ServerThread {
         datagramSocket.bind(socketAddress);
 
         //initialize data storage
-        storedData = new HashMap<>();
+        storedData = new HashMap();
 
         //create server thread
-        createServerThread();
+        runServer();
 
     }
 //request format <command:+:hash:+:value>
 //e.g: "put:+:1bc29b36f623ba82aaf6724fd3b16718:+:bla-bla-bla\nla-la-la-la\nblum-blum"
-    public void createServerThread() {
-        Thread serverThread = new Thread() {
-            public void run() {
-                while (true) {
-                    byte[] buf = new byte[256];
-                    packet = new DatagramPacket(buf, buf.length);
+    public void runServer() {
+        {
+            while (true) {
+                byte[] buf = new byte[256];
+                packet = new DatagramPacket(buf, buf.length);
 
-                    try {
-                        datagramSocket.receive(packet);
-                        String[] request = (new String(packet.getData(), 0, packet.getLength())).split(":+:");
-                        String command = request[0];
+                try {
+                    datagramSocket.receive(packet);
+                    String req = (new String(packet.getData(), 0, packet.getLength()));
+                    String [] request = req.split("-");
+                    String command = request[0];
 
-                        if (contains(command)) {
-                            String hash = request[1];
-                            String value = "";
-                            Commands c = Commands.valueOf(command);
-                            switch (c) {
-                                case put:
-                                    value = request[2];
-                                    if (value!=null) {
-                                        if (storedData.containsKey(hash)){
-                                            storedData.remove(hash);
-                                            storedData.put(hash, value);
-                                        } else {
-                                            storedData.put(hash, value);
-                                        }
-                                        buf = "ok".getBytes();
-                                    } else {
-                                        buf = "null".getBytes();
-                                    }
-
-                                    break;
-                                case rm:
-                                    value = storedData.get(hash);
-                                    if (value!=null){
+                    if (contains(command)) {
+                        String hash = request[1];
+                        String value = "";
+                        Commands c = Commands.valueOf(command);
+                        switch (c) {
+                            case put:
+                                value = request[2];
+                                if (value != null) {
+                                    if (storedData.containsKey(hash)) {
                                         storedData.remove(hash);
-                                        buf = "ok".getBytes();
+                                        storedData.put(hash, value);
                                     } else {
-                                        buf = "null".getBytes();
+                                        storedData.put(hash, value);
                                     }
+                                    buf = "ok".getBytes();
+                                } else {
+                                    buf = "storing_fails".getBytes();
+                                }
 
-                                    break;
-                                case get:
-                                    value = storedData.get(hash);
-                                    if (value!=null){
-                                        buf = value.getBytes();
-                                    } else {
-                                        buf = "null".getBytes();
-                                    }
-                                    break;
-                                default:
-                                    buf = "null".getBytes();
-                            }
-                        } else {
-                            buf = "null".getBytes();
+                                break;
+                            case rm:
+                                value = storedData.get(hash);
+                                if (value != null) {
+                                    storedData.remove(hash);
+                                    buf = "ok".getBytes();
+                                } else {
+                                    buf = "deleting_fails".getBytes();
+                                }
+
+                                break;
+                            case get:
+                                value = storedData.get(hash);
+                                if (value != null) {
+                                    buf = value.getBytes();
+                                } else {
+                                    buf = "getting_fails".getBytes();
+                                }
+                                break;
+                            default:
+                                buf = "procedure_fails".getBytes();
                         }
-                        packet = new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort());
-                        datagramSocket.send(packet);
-
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    } else {
+                        buf = "can't recognize command".getBytes();
                     }
+                    packet = new DatagramPacket(buf, buf.length, packet.getAddress(), packet.getPort());
+                    datagramSocket.send(packet);
+
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
-        };
-        serverThread.setPriority(Thread.MAX_PRIORITY);
-        serverThread.start();
+        }
     }
 
     public enum Commands {

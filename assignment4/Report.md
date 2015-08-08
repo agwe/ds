@@ -66,7 +66,10 @@ All files are stored without any hierarchy with their hash as names instead of t
 ##DSS Taxonomy##
 Solution represents global centrilized architecture in trusted environment
 
-
+##Running the solution##
+1. Compile the program and run from target:
+2. Run server(s) via console java -cp dfs-1.0-SNAPSHOT.jar edu.innopolis.Server 127.0.0.1:4446 (don't forget to change port number. Note, that the addresses specified must be declared in servers.txt)
+2. Run client java -cp dfs-1.0-SNAPSHOT.jar edu.innopolis.Client 127.0.0.1:4445 servers
 
 
 

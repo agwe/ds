@@ -1,5 +1,6 @@
 package edu.innopolis;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -9,8 +10,9 @@ public class FileNode extends TreeNode{
     private String pathToServer;
     private String hash;
 
-    public FileNode(String name) {
+    public FileNode(String name, DirectoryNode parent) {
         this.setName(name);
+        this.setParent(parent);
         this.hash = String.valueOf(getNodePath().hashCode());
     }
 
@@ -32,7 +34,7 @@ public class FileNode extends TreeNode{
 
     @Override
     public List getInfo() {
-        List<String> nodeParameters = null;
+        ArrayList<String> nodeParameters = new ArrayList();
         nodeParameters.add("File name: " + this.getName());
         nodeParameters.add("File parent directory: " + this.getParent().getName());
         nodeParameters.add("File path to the server: " + this.getPathToServer());
