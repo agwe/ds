@@ -1,0 +1,7 @@
+Documentation for the application programmers
+
+describing each of your
+map­reduce library and your I/O library, and how they are used together. This
+should include a reference manual for the APIs, as well as a tutorial with at least
+two described examples (This documentation, and the documentation mentioned
+in the Examples section are one and the same).
