@@ -144,6 +144,21 @@ public class Client
                             logger.info("[Client]: No file or directory with the name specified was found");
                         }
                         break;
+                    case mapreduce:
+                    	if (cmd.length != 3){
+                    		logger.info("[Client]: Please specify the correct argument.");
+	                        break;
+                    	}                    			
+                        if (! master.ifChildFileExist(arg)){
+                            logger.info("[Client]: No file was found");
+	                        break;
+                        }
+                        
+                    	response = master.mapReduce(arg, cmd[2]);
+                    	logger.info("Result of mapreduce for " + arg + ":");
+                    	logger.info(response);
+                    	break;
+
                 }
             }
         } else if (cmd[0].equals("help")){
@@ -198,7 +213,8 @@ public class Client
         mkdir,
         rmdir,
         cd,
-        stat
+        stat,
+        mapreduce
     }
 
     public static boolean contains(String test) {

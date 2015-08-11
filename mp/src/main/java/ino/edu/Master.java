@@ -4,9 +4,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.*;
 import java.util.logging.Logger;
 
 /**
@@ -80,7 +78,6 @@ public class Master {
             return "";
         }
     }
-
 
     public String requestServer(String command, String hash, String pathToServer, String value) throws SocketException {
         datagramSocket.setSoTimeout(10000);
@@ -321,6 +318,81 @@ public class Master {
                 }
             }
         return nodeParameters;
+    }
+    
+    public String mapReduce(String name, String res_name) {
+    	if (currentDirectory.ifChildFileExist(res_name)){
+            return String.valueOf(response.FILE_EXIST);
+        }
+    	
+    	ArrayList<TreeNode> nodes = currentDirectory.getChildFileByName(name);
+        if (nodes!=null && !nodes.isEmpty()){
+            FileNode node = (FileNode) nodes.get(0);
+            String resp;
+			try {
+				resp = requestServer("get", node.getHash(), node.getPathToServer(), "");
+				if (resp.equals("ok") || resp.equals("null")){
+	            	return String.valueOf(response.FAIL);
+	            }
+			
+				String value = "";
+				int TOP_WORDS = 10;
+				
+				
+				Scanner sc = new Scanner(resp);
+		        String word;
+		        HashMap<String, Integer> words = new HashMap<String, Integer>();
+		        int count, current;
+		        
+		        count = 0;
+		        while ( sc.hasNext() ) {
+		            word = sc.next();
+		            ++count;
+		            words.put(word, ( words.containsKey(word) ) ? ( words.get(word) + 1 ) : 1 );
+		        }
+		        
+		        sc.close();
+		        
+		        ValueComparator cmp = new ValueComparator(words);
+		        TreeMap<String, Integer> ordered = new TreeMap<String, Integer>(cmp);
+		        ordered.putAll(words);
+		        
+		        logger.info(count + " words found.");
+		        logger.info("Top " + TOP_WORDS + " frequently meeting words:");
+		        current = 0;
+		        for ( String key : ordered.keySet() ) {
+		            if ( ++current > TOP_WORDS )
+		                break;
+		            int val = words.get(key);
+		            value += key + ": " + val + " (" + ((double)val * 100.0 / count) + "%)\n" ;
+		        }
+				
+		        FileNode res_node = new FileNode(res_name, currentDirectory);
+		        String res_resp = requestServer("put", res_node.getHash(), null, value);
+		        if (res_resp.equals("ok")){
+		            currentDirectory.setChildren(res_node);
+		            res_node.setParent(currentDirectory);
+		            res_node.setPathToServer(serverAddress);
+		            return String.valueOf(response.OK);
+				}
+	        } catch (SocketException e) {
+	        	return String.valueOf(response.FAIL);
+	        }
+        }
+    	
+        return String.valueOf(response.FAIL);
+    }
+    
+    private class ValueComparator implements Comparator<String> {
+        Map<String, Integer> base;
+        
+        public ValueComparator(Map<String, Integer> base) {
+            this.base = base;
+        }
+        
+        public int compare(String a, String b) {
+            return ( base.get(a) >= base.get(b) ) ? -1 : 1;
+        }
     }
 
     public enum response {

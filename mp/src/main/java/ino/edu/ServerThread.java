@@ -86,6 +86,18 @@ public class ServerThread {
                                     buf = "getting_fails".getBytes();
                                 }
                                 break;
+                                
+                            case mapreduce:
+                            	value = storedData.get(hash);
+                                if (value != null) {
+                                    //mapreduce(value);
+                                	//System.out.println(value);
+                                    buf = "ok".getBytes();
+                                } else {
+                                    buf = "mapreduce_fails".getBytes();
+                                }
+                                break;
+
                             default:
                                 buf = "procedure_fails".getBytes();
                         }
@@ -105,7 +117,8 @@ public class ServerThread {
     public enum Commands {
         get,
         put,
-        rm
+        rm,
+        mapreduce
     }
 
     public static boolean contains(String test) {
