@@ -88,6 +88,24 @@ public class Client
                             logger.info("[Client]: No file with the name specified was found");
                         }
                         break;
+                    case load:
+                        exist = master.ifChildFileExist(arg);
+
+                        if (!exist && cmd.length == 2){
+                            response = master.loadFile(arg);
+                            if (response.equals("OK")){
+                                logger.info("[Client]: File " + arg + " was loaded");
+                            }
+                            else {
+                                logger.info("[Client]: File " + arg + " wasn't loaded");
+                            }
+                        } else if (exist){
+                            logger.info("[Client]: File " + arg + " is already exist");
+                        } else if (!exist && cmd.length == 1){
+                            logger.info("[Client]: Please specify filename");
+                        }
+                        break;
+
                     case rm:
                         response = master.deleteFile(arg);
                         if (response.equals("NO_FILE")) {
@@ -214,6 +232,7 @@ public class Client
         rmdir,
         cd,
         stat,
+        load,
         mapreduce
     }
 

@@ -3,6 +3,7 @@ package ino.edu;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.*;
 import java.util.*;
 import java.util.logging.Logger;
@@ -150,6 +151,26 @@ public class Master {
         }
         else {
             FileNode node = new FileNode(name, currentDirectory);
+            String resp = requestServer("put", node.getHash(), null, value);
+            if (resp.equals("ok")){
+                currentDirectory.setChildren(node);
+                node.setParent(currentDirectory);
+                node.setPathToServer(serverAddress);
+                return String.valueOf(response.OK);
+            }
+        }
+        return String.valueOf(response.FAIL);
+    }
+
+    public String loadFile(String name) throws SocketException {
+        if (currentDirectory.ifChildFileExist(name)){
+            return String.valueOf(response.FILE_EXIST);
+        }
+        else {
+            FileNode node = new FileNode(name, currentDirectory);
+            InputStream inputStream =
+                    Master.class.getResourceAsStream(name);
+            String value = new Scanner(inputStream,"UTF-8").useDelimiter("\\A").next();
             String resp = requestServer("put", node.getHash(), null, value);
             if (resp.equals("ok")){
                 currentDirectory.setChildren(node);
